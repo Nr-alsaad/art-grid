@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#7567A8" />
+<title>Art grid by Nora</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+  <section id="libraryScreen" class="screen active">
+    <header class="library-header">
+      <div>
+        <h1>Art grid by Nora</h1>
+        <p>وضع الضيف · الحفظ المحلي متاح بدون حساب</p>
+      </div>
+      <div class="header-actions">
+        <button id="newProjectBtn" class="primary">مشروع جديد</button>
+        <button id="importProjectBtn">استيراد GRP</button>
+        <input id="importProjectInput" type="file" accept=".grp,.json" hidden />
+        <button id="loginBtn">تسجيل الدخول</button>
+      </div>
+    </header>
+    <section class="library-section">
+      <div class="section-head">
+        <h2>المشاريع</h2>
+        <input id="projectSearch" placeholder="ابحث باسم المشروع" />
+      </div>
+      <div id="projectsGrid" class="projects-grid"></div>
+      <div id="emptyLibrary" class="empty-state">لا توجد مشاريع بعد.</div>
+    </section>
+  </section>
+
+  <section id="editorScreen" class="screen">
+    <header id="topBar" class="topbar">
+      <div class="top-group right">
+        <button id="backToLibraryBtn" title="العودة للمكتبة">Art grid by Nora</button>
+      </div>
+      <div class="top-group center">
+        <button id="undoBtn" title="تراجع" aria-label="تراجع"><svg class="top-icon" viewBox="0 0 24 24"><path d="M9 7 4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 6 6"/></svg></button>
+        <button id="redoBtn" title="إعادة" aria-label="إعادة"><svg class="top-icon" viewBox="0 0 24 24"><path d="m15 7 5 5-5 5"/><path d="M20 12H10a6 6 0 0 0-6 6"/><circle cx="6" cy="5" r="2"/></svg></button>
+        <button id="zoomOutBtn" title="تصغير" aria-label="تصغير">−</button>
+        <button id="zoomInBtn" title="تكبير" aria-label="تكبير">＋</button>
+        <button id="fitBtn" title="ملاءمة" aria-label="ملاءمة">⤢</button>
+      </div>
+      <div class="top-group left">
+        <span id="saveIndicator" class="save-indicator">محفوظ</span>
+        <button id="exportBtn" class="top-action">⇩ تصدير</button>
+      </div>
+    </header>
+
+    <main id="workspaceWrap" class="workspace-wrap">
+      <canvas id="mainCanvas"></canvas>
+      <div id="toast" class="toast"></div>
+      <div id="selectionBadge" class="selection-badge hidden"></div>
+    </main>
+
+    <aside id="layersDock" class="layers-dock" aria-label="لوحة الطبقات"></aside>
+
+    <div id="statusBar" class="statusbar">
+      <span id="zoomStatus">100%</span>
+      <span id="projectStatus">—</span>
+      <button id="activeLayerStatus" class="status-button">عام ▾</button>
+      <span id="gridStatus">الشبكة: مخفية</span>
+      <span id="cellStatus">المربع: —</span>
+      <span id="elementStatus">لا يوجد عنصر محدد</span>
+    </div>
+
+    <section id="contextPanel" class="context-panel hidden"></section>
+
+    <nav id="bottomToolbar" class="bottom-toolbar">
+      <button data-tab="image"><svg class="tool-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span>تعديل الصورة</span></button>
+      <button data-tab="filters"><svg class="tool-icon" viewBox="0 0 24 24"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6Z"/><path d="m5 15-.8 2.2L2 18l2.2.8L5 21l.8-2.2L8 18l-2.2-.8Z"/></svg><span>فلاتر الرسم</span></button>
+      <button data-tab="grid"><svg class="tool-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg><span>الشبكة</span></button>
+      <button data-tab="notebook"><svg class="tool-icon" viewBox="0 0 24 24"><path d="M4 3h14a2 2 0 0 1 2 2v16H6a2 2 0 0 1-2-2Z"/><path d="M8 3v18M12 7h5M12 11h5"/></svg><span>الكراسة</span></button>
+      <button data-tab="basicDiag"><svg class="tool-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/></svg><span>الأقطار الأساسية</span></button>
+      <button data-tab="subDiag"><svg class="tool-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18M3 12h18M7 5v4M5 7h4M17 15v4M15 17h4"/></svg><span>الأقطار الفرعية</span></button>
+      <button data-tab="axes"><svg class="tool-icon" viewBox="0 0 24 24"><path d="M4 20 20 4M4 14v6h6M14 4h6v6"/></svg><span>المحاور</span></button>
+      <button data-tab="shapes"><svg class="tool-icon" viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><rect x="12" y="12" width="8" height="8" rx="1"/><path d="m4 20 4-7 4 7Z"/></svg><span>الأشكال</span></button>
+      <button data-tab="layers"><svg class="tool-icon" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5Z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/></svg><span>الطبقات</span></button>
+    </nav>
+  </section>
+</div>
+
+<!-- New project modal -->
+<div id="newProjectModal" class="modal hidden">
+  <div class="modal-card">
+    <h3>مشروع جديد</h3>
+    <label>اختيار الصورة</label>
+    <div class="source-buttons">
+      <button id="pickPhotoBtn">ألبوم الصور / الملفات</button>
+      <button id="pickCameraBtn">الكاميرا</button>
+      <button id="useSampleBtn">صورة تجريبية</button>
+    </div>
+    <input id="imageInput" type="file" accept="image/*" hidden />
+    <input id="cameraInput" type="file" accept="image/*" capture="environment" hidden />
+    <div id="pickedImageName" class="hint">لم يتم اختيار صورة</div>
+
+    <label>اسم المشروع <b>*</b></label>
+    <input id="projectNameInput" maxlength="80" required autocomplete="off" placeholder="مثال: بورتريه 1" />
+    <div id="newProjectError" class="form-error hidden" role="alert"></div>
+
+    <label>مقاس الورق</label><div class="segmented" id="frameShapeSelector"><button data-value="A3">A3</button><button data-value="A4" class="active">A4</button><button data-value="A5">A5</button><button data-value="B5">B5</button></div>
+    <label>اتجاه الورق</label><div class="segmented" id="paperOrientationSelector"><button data-value="portrait" class="active">طولي</button><button data-value="landscape">عرضي</button></div>
+
+    <label>مكان الحفظ</label>
+    <div class="save-choice">
+      <label><input type="radio" name="savePlace" value="device" checked /> الجهاز</label>
+      <label><input type="radio" name="savePlace" value="cloud" /> السحابة</label>
+      <label><input type="radio" name="savePlace" value="both" /> الجهاز + السحابة</label>
+    </div>
+    <p class="hint">السحابة تحتاج حسابًا وخادمًا خارجيًا؛ الإصدار الحالي يحفظ محليًا على الجهاز.</p>
+
+    <div class="modal-actions">
+      <button id="cancelNewProjectBtn">إلغاء</button>
+      <button id="createProjectBtn" class="primary">إنشاء المشروع</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export modal -->
+<div id="exportModal" class="modal hidden">
+  <div class="modal-card large">
+    <h3>التصدير</h3>
+    <div class="export-grid">
+      <button data-export="imageGrid">الصورة + الشبكة الرئيسية فقط</button>
+      <button data-export="imageAll">الصورة + الشبكة + جميع الطبقات</button>
+      <button data-export="imageLayer">الصورة + الشبكة + طبقة محددة</button>
+      <button data-export="whiteDiags">خلفية بيضاء + الشبكة + الأقطار</button>
+      <button data-export="gridDrawing">الشبكة + الأقطار + الرسم</button>
+      <button data-export="drawingOnly">طبقة الرسم فقط</button>
+      <button data-export="current">تصدير كما يظهر الآن</button>
+      <button data-export="all">حفظ كل الخيارات السابقة دفعة واحدة</button>
+    </div>
+    <div class="modal-actions">
+      <button id="closeExportBtn">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<div id="saveShareModal" class="modal hidden">
+  <div class="modal-card save-share-card">
+    <h3>حفظ أو مشاركة</h3>
+    <div id="saveSharePreview" class="save-share-preview"></div>
+    <p id="saveShareStatus" class="hint">تم تجهيز الملف للحفظ أو المشاركة</p>
+    <div id="saveShareActions" class="modal-actions"></div>
+    <div class="modal-actions"><button id="closeSaveShareBtn">إغلاق</button></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
