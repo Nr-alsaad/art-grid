@@ -2,6 +2,11 @@
 (() => {
 "use strict";
 
+// This file can be inspected/imported by Vercel's server-side build runtime.
+// Keep the complete UI bootstrap browser-only so no DOM global is evaluated
+// while `window` and `document` do not exist.
+if (typeof window === "undefined" || typeof document === "undefined") return;
+
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
